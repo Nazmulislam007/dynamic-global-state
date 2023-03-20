@@ -1,21 +1,23 @@
 const reducer = (state, { type, payload }) => {
    switch (type) {
-      case 'INITIAL_STATE_KEYS': {
-         return {
-            ...payload,
-         };
-      }
+      case 'INITIAL_STATE': {
+         const { selectedCatagoryOptions, questions, existingServices } = payload;
 
-      case 'UPDATE_STATE': {
+         const que = {};
+         const opt = {};
+
+         selectedCatagoryOptions.forEach((option) => {
+            opt[option] = '';
+         });
+
+         questions.forEach((question) => {
+            que[question.questionId] = existingServices[question.questionId]
+               ? { ...opt, ...existingServices[question.questionId] }
+               : opt;
+         });
+
          return {
-            ...state,
-            [payload.questionId]: {
-               ...state[payload.questionId],
-               [payload.activeOption]:
-                  (payload.existingServices[payload.questionId] &&
-                     payload.existingServices[payload.questionId][payload.activeOption]) ||
-                  '',
-            },
+            ...que,
          };
       }
 
@@ -78,6 +80,12 @@ const reducer = (state, { type, payload }) => {
 
 export const databaseReducer = (state, { type, payload }) => {
    switch (type) {
+      case 'ADD_SERVICES_DATA': {
+         return [
+            ...state.filter((serv) => !(serv.customerId === payload.customerId && serv.service === payload.service)),
+            payload,
+         ];
+      }
       default:
          return state;
    }

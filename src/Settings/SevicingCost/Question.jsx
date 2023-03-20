@@ -1,13 +1,13 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Input, InputLabel, ListItem } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { useGlobalState } from '../../Context/GlobalStateProvider';
 import Options from './Options';
 import PerSqft from './PerSqft';
 
 const CUSTOMER_ID = 23;
 
-export default function Question({ quesitionName, questionId, options, serviceSettings }) {
+const Question = forwardRef(({ quesitionName, questionId, options, serviceSettings, setIsFetch }, ref) => {
    const { state, dispatch, serviceDataState } = useGlobalState();
    const [activeOption, setActiveOption] = useState('free');
 
@@ -18,7 +18,7 @@ export default function Question({ quesitionName, questionId, options, serviceSe
 
    const updateAciveOption = existingServices[questionId] && Object.keys(existingServices[questionId])[0];
 
-   console.log(state);
+   // console.log(updateAciveOption);
 
    useEffect(() => {
       if (updateAciveOption) {
@@ -27,17 +27,8 @@ export default function Question({ quesitionName, questionId, options, serviceSe
    }, [updateAciveOption, quesitionName]);
 
    useEffect(() => {
-      if (existingServices) {
-         dispatch({
-            type: 'UPDATE_STATE',
-            payload: {
-               existingServices,
-               questionId,
-               activeOption,
-            },
-         });
-      }
-   }, [quesitionName, existingServices, dispatch, questionId, activeOption]);
+      setIsFetch(activeOption);
+   }, [activeOption, setIsFetch]);
 
    const handleInputValueChange = (e) => {
       dispatch({
@@ -60,6 +51,9 @@ export default function Question({ quesitionName, questionId, options, serviceSe
          },
       });
    };
+
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   useImperativeHandle(ref, () => ({ [questionId]: activeOption }), [updateAciveOption, activeOption, questionId]);
 
    return (
       <ListItem sx={{ padding: '30px 10px', display: 'flex', gap: 2, flexDirection: 'column', borderBottom: '1px solid' }}>
@@ -96,4 +90,6 @@ export default function Question({ quesitionName, questionId, options, serviceSe
          )}
       </ListItem>
    );
-}
+});
+
+export default Question;
